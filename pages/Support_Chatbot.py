@@ -1,165 +1,164 @@
 import streamlit as st
+from openai import OpenAI
 
+# -----------------------------------
+# PAGE CONFIG
+# -----------------------------------
 st.set_page_config(
-    page_title="Support Chatbot",
+    page_title="MiniStore Support",
     page_icon="💬"
 )
 
-st.title("💬 MiniStore Support Assistant")
+st.title("💬 MiniStore AI Support")
 
-st.write(
-    "Ask me about products, orders, delivery, returns, refunds and payments."
+# -----------------------------------
+# OPENAI CLIENT
+# -----------------------------------
+client = OpenAI(
+    api_key=st.secrets["OPENAI_API_KEY"]
 )
 
-# ---------------------------------------------------
-# PRODUCT DATABASE
-# ---------------------------------------------------
+# -----------------------------------
+# STORE PRODUCT CATALOG
+# -----------------------------------
+catalog = """
+MiniStore Product Catalog:
 
-products = {
-    "headphones":"Wireless Bluetooth Headphones ($79.99)",
-    "watch":"Smart Fitness Watch ($129.99)",
-    "keyboard":"Mechanical Keyboard ($89.99)",
-    "backpack":"Minimalist Backpack ($54.99)",
-    "coffee":"Portable Coffee Maker ($39.99)",
-    "lamp":"LED Desk Lamp ($29.99)"
-}
+1. Wireless Bluetooth Headphones
+   Price: $79.99
+   Category: Electronics
+   Features:
+   - Noise cancellation
+   - Bluetooth connectivity
+   - Long battery life
 
-# ---------------------------------------------------
+2. Smart Fitness Watch
+   Price: $129.99
+   Category: Wearables
+   Features:
+   - Heart rate monitoring
+   - Sleep tracking
+   - Fitness tracking
+
+3. Mechanical Keyboard
+   Price: $89.99
+   Category: Electronics
+   Features:
+   - RGB lighting
+   - Mechanical switches
+   - Gaming and productivity
+
+4. Minimalist Backpack
+   Price: $54.99
+   Category: Fashion
+   Features:
+   - Lightweight
+   - Travel friendly
+   - Durable material
+
+5. Portable Coffee Maker
+   Price: $39.99
+   Category: Home & Kitchen
+   Features:
+   - Compact design
+   - Travel use
+   - Easy cleaning
+
+6. LED Desk Lamp
+   Price: $29.99
+   Category: Home & Kitchen
+   Features:
+   - Eye-care lighting
+   - Adjustable brightness
+   - Energy efficient
+"""
+
+# -----------------------------------
+# SYSTEM PROMPT
+# -----------------------------------
+SYSTEM_PROMPT = f"""
+You are MiniStore's professional customer support representative.
+
+Your responsibilities:
+- Help customers with products.
+- Help with orders.
+- Help with delivery questions.
+- Help with refunds.
+- Help with returns.
+- Help with payment methods.
+
+Store information:
+
+{catalog}
+
+Rules:
+1. Answer ONLY MiniStore-related questions.
+2. If a user asks about topics unrelated to MiniStore,
+   politely explain that you only provide assistance
+   regarding MiniStore products and services.
+3. Be friendly, professional, and concise.
+4. Use the product catalog when answering product questions.
+5. Never invent products not listed in the catalog.
+"""
+
+# -----------------------------------
 # CHAT HISTORY
-# ---------------------------------------------------
-
+# -----------------------------------
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {
-            "role":"assistant",
-            "content":"Hi! I'm MiniStore Support. How can I help you today?"
-        }
-    ]
+    st.session_state.messages = []
 
-# Display messages
+# -----------------------------------
+# DISPLAY CHAT
+# -----------------------------------
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-for msg in st.session_state.messages:
-
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# ---------------------------------------------------
-# RULE-BASED BOT
-# ---------------------------------------------------
-
-def get_response(user_text):
-
-    text = user_text.lower()
-
-    # Product Questions
-
-    if "product" in text:
-        return """
-Available products:
-
-• Wireless Bluetooth Headphones - $79.99
-• Smart Fitness Watch - $129.99
-• Mechanical Keyboard - $89.99
-• Minimalist Backpack - $54.99
-• Portable Coffee Maker - $39.99
-• LED Desk Lamp - $29.99
-"""
-
-    if "headphones" in text:
-        return "Our Wireless Bluetooth Headphones cost $79.99 and feature noise cancellation."
-
-    if "watch" in text:
-        return "The Smart Fitness Watch costs $129.99 and tracks fitness, sleep and heart rate."
-
-    if "keyboard" in text:
-        return "The Mechanical Keyboard costs $89.99 and includes RGB lighting."
-
-    if "backpack" in text:
-        return "The Minimalist Backpack costs $54.99 and is great for travel."
-
-    if "lamp" in text:
-        return "The LED Desk Lamp costs $29.99 and offers eye-care lighting."
-
-    if "coffee" in text:
-        return "The Portable Coffee Maker costs $39.99 and is perfect for travel."
-
-    # Delivery
-
-    if "delivery" in text or "shipping" in text:
-        return "Standard delivery takes 3-5 business days."
-
-    # Refunds
-
-    if "refund" in text:
-        return "Refunds are processed within 5-7 business days after approval."
-
-    # Returns
-
-    if "return" in text:
-        return "Products can be returned within 30 days of delivery."
-
-    # Payment
-
-    if "payment" in text or "pay" in text:
-        return """
-We accept:
-
-• Visa
-• Mastercard
-• UPI
-• PayPal
-• Net Banking
-"""
-    # Order Status
-
-    if "order" in text or "status" in text:
-        return """
-Demo Order Status:
-
-Order #MS12345
-Status: Shipped 🚚
-Estimated Delivery: 2 Days
-"""
-
-    return """
-I can help with:
-
-• Products
-• Delivery
-• Refunds
-• Returns
-• Payments
-• Order Status
-"""
-
-# ---------------------------------------------------
-# CHAT INPUT
-# ---------------------------------------------------
-
-user_prompt = st.chat_input(
-    "Ask your question..."
+# -----------------------------------
+# USER INPUT
+# -----------------------------------
+prompt = st.chat_input(
+    "Ask about products, delivery, refunds, returns or payments..."
 )
 
-if user_prompt:
+if prompt:
 
     st.session_state.messages.append(
         {
-            "role":"user",
-            "content":user_prompt
+            "role": "user",
+            "content": prompt
         }
     )
 
     with st.chat_message("user"):
-        st.markdown(user_prompt)
+        st.markdown(prompt)
 
-    response = get_response(user_prompt)
+    messages = [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT
+        }
+    ]
+
+    messages.extend(st.session_state.messages)
+
+    with st.chat_message("assistant"):
+
+        with st.spinner("Thinking..."):
+
+            response = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=messages,
+                temperature=0.3
+            )
+
+            reply = response.choices[0].message.content
+
+            st.markdown(reply)
 
     st.session_state.messages.append(
         {
-            "role":"assistant",
-            "content":response
+            "role": "assistant",
+            "content": reply
         }
     )
-
-    with st.chat_message("assistant"):
-        st.markdown(response)
