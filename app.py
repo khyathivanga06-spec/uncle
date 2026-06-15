@@ -215,10 +215,9 @@ for i, product in enumerate(filtered):
 # ---------------------------------------
 # FLOATING SUPPORT BUTTON
 # ---------------------------------------
-
-st.markdown("""
-<a href="/Support_Chatbot" target="_self" class="support-btn">
-💬 Support
-</a>
-""", unsafe_allow_html=True)
+st.page_link(
+    "pages/Support_Chatbot.py",
+    label="💬 Support Chatbot",
+    icon="💬"
+)
 
