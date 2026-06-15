@@ -1,22 +1,22 @@
 import streamlit as st
 
-# ---------------------------------------
+# --------------------------------------------------
 # PAGE CONFIG
-# ---------------------------------------
+# --------------------------------------------------
 st.set_page_config(
     page_title="MiniStore",
     page_icon="🛍️",
     layout="wide"
 )
 
-# ---------------------------------------
-# CSS
-# ---------------------------------------
+# --------------------------------------------------
+# CUSTOM CSS
+# --------------------------------------------------
 st.markdown("""
 <style>
 
 .stApp{
-    background:#f5f7fb;
+    background-color:#f5f7fb;
 }
 
 .hero{
@@ -32,9 +32,8 @@ st.markdown("""
     background:white;
     padding:20px;
     border-radius:15px;
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    box-shadow:0px 4px 12px rgba(0,0,0,0.08);
     margin-bottom:20px;
-    min-height:250px;
 }
 
 .product-title{
@@ -44,8 +43,8 @@ st.markdown("""
 
 .product-price{
     color:green;
-    font-weight:bold;
     font-size:18px;
+    font-weight:bold;
 }
 
 .category{
@@ -57,98 +56,78 @@ st.markdown("""
     margin-bottom:10px;
 }
 
-/* Floating support button */
-
-.support-btn{
-    position:fixed;
-    bottom:30px;
-    right:30px;
-    background:#4F46E5;
-    color:white;
-    padding:15px 25px;
-    border-radius:50px;
-    text-decoration:none;
-    font-weight:bold;
-    z-index:999;
-    box-shadow:0 6px 15px rgba(0,0,0,.25);
-}
-
-.support-btn:hover{
-    background:#4338CA;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------
-# PRODUCTS
-# ---------------------------------------
-
+# --------------------------------------------------
+# PRODUCT DATA
+# --------------------------------------------------
 products = [
     {
         "name":"Wireless Bluetooth Headphones",
         "price":79.99,
-        "category":"Electronics",
-        "description":"Premium noise-cancelling headphones."
+        "description":"Premium over-ear headphones with noise cancellation.",
+        "category":"Electronics"
     },
     {
         "name":"Smart Fitness Watch",
         "price":129.99,
-        "category":"Wearables",
-        "description":"Track fitness and health metrics."
+        "description":"Track fitness, sleep and heart rate.",
+        "category":"Wearables"
     },
     {
         "name":"Mechanical Keyboard",
         "price":89.99,
-        "category":"Electronics",
-        "description":"RGB mechanical gaming keyboard."
+        "description":"RGB mechanical keyboard for gaming and work.",
+        "category":"Electronics"
     },
     {
         "name":"Minimalist Backpack",
         "price":54.99,
-        "category":"Fashion",
-        "description":"Stylish travel backpack."
+        "description":"Stylish backpack for travel and college.",
+        "category":"Fashion"
     },
     {
         "name":"Portable Coffee Maker",
         "price":39.99,
-        "category":"Home & Kitchen",
-        "description":"Brew coffee anywhere."
+        "description":"Brew coffee anywhere you go.",
+        "category":"Home & Kitchen"
     },
     {
         "name":"LED Desk Lamp",
         "price":29.99,
-        "category":"Home & Kitchen",
-        "description":"Eye-care LED lighting."
+        "description":"Eye-friendly LED lighting for study and work.",
+        "category":"Home & Kitchen"
     }
 ]
 
-# ---------------------------------------
+# --------------------------------------------------
 # SIDEBAR
-# ---------------------------------------
-
+# --------------------------------------------------
 st.sidebar.title("🛍️ MiniStore")
 
 categories = ["All"] + sorted(
-    list(set(p["category"] for p in products))
+    list(set(product["category"] for product in products))
 )
 
-selected = st.sidebar.selectbox(
-    "Categories",
+selected_category = st.sidebar.selectbox(
+    "Browse Categories",
     categories
 )
 
 st.sidebar.markdown("---")
 
-st.sidebar.subheader("🛒 Cart Summary")
+st.sidebar.subheader("🛒 Shopping Cart")
+
 st.sidebar.write("Items: 3")
 st.sidebar.write("Subtotal: $249.97")
 st.sidebar.success("Total: $249.97")
 
-# ---------------------------------------
-# HERO
-# ---------------------------------------
+st.sidebar.markdown("---")
 
+# --------------------------------------------------
+# HERO SECTION
+# --------------------------------------------------
 st.markdown("""
 <div class="hero">
 <h1>🛍️ MiniStore</h1>
@@ -156,68 +135,62 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# --------------------------------------------------
+# WELCOME
+# --------------------------------------------------
 st.header("Welcome to MiniStore")
 
 st.write("""
-Browse premium products at affordable prices.
-Discover our featured collection below.
+Discover premium products at amazing prices.
+Browse our featured collection below.
 """)
 
-# ---------------------------------------
-# FILTER
-# ---------------------------------------
-
-if selected == "All":
-    filtered = products
+# --------------------------------------------------
+# FILTER PRODUCTS
+# --------------------------------------------------
+if selected_category == "All":
+    filtered_products = products
 else:
-    filtered = [
-        p for p in products
-        if p["category"] == selected
+    filtered_products = [
+        product
+        for product in products
+        if product["category"] == selected_category
     ]
 
-# ---------------------------------------
-# PRODUCTS
-# ---------------------------------------
-
+# --------------------------------------------------
+# FEATURED PRODUCTS
+# --------------------------------------------------
 st.header("Featured Products")
 
 cols = st.columns(3)
 
-for i, product in enumerate(filtered):
+for i, product in enumerate(filtered_products):
 
     with cols[i % 3]:
 
-        st.markdown(f"""
-        <div class="product-card">
-
-        <div class="category">
-        {product['category']}
-        </div>
-
-        <div class="product-title">
-        {product['name']}
-        </div>
-
-        <div class="product-price">
-        ${product['price']}
-        </div>
-
-        <p>{product['description']}</p>
-
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div class="product-card">
+                <div class="category">{product['category']}</div>
+                <div class="product-title">{product['name']}</div>
+                <div class="product-price">${product['price']}</div>
+                <p>{product['description']}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         st.button(
             "Add to Cart",
-            key=i
+            key=f"cart_{i}"
         )
 
-# ---------------------------------------
-# FLOATING SUPPORT BUTTON
-# ---------------------------------------
-st.page_link(
-    "pages/Support_Chatbot.py",
-    label="💬 Support Chatbot",
-    icon="💬"
+# --------------------------------------------------
+# SUPPORT MESSAGE
+# --------------------------------------------------
+st.markdown("---")
+
+st.info(
+    "💬 Open the 'Support Chatbot' page from the Streamlit sidebar navigation."
 )
 
